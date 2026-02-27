@@ -1,0 +1,180 @@
+[
+  {
+    "flag": {
+      "rand_memory": true
+    },
+    "reg#x0": 0,
+    "reg#c": 0,
+    "reg#z": 0,
+    "reg#x30": 0
+  },
+  {
+    "flag": {
+      "rand_memory": true
+    },
+    "reg#x0": 1,
+    "reg#c": 0,
+    "reg#z": 0,
+    "reg#x30": 0
+  },
+  {
+    "flag": {
+      "rand_memory": true
+    },
+    "reg#x0": 2147483647,
+    "reg#x1": 0,
+    "reg#c": 0,
+    "reg#z": 0,
+    "reg#x30": 0
+  },
+  {
+    "flag": {
+      "rand_memory": true
+    },
+    "reg#x0": 2147483646,
+    "reg#x1": 0,
+    "reg#c": 0,
+    "reg#z": 0,
+    "reg#x30": 0
+  },
+  {
+    "flag": {
+      "rand_memory": true
+    },
+    "reg#x0": 536870914,
+    "reg#x1": 0,
+    "reg#c": 0,
+    "reg#z": 0,
+    "reg#x30": 0
+  },
+  {
+    "flag": {
+      "rand_memory": true
+    },
+    "reg#x0": 1073741826,
+    "reg#x1": 0,
+    "reg#c": 0,
+    "reg#z": 0,
+    "reg#x30": 0
+  },
+  {
+    "flag": {
+      "rand_memory": true
+    },
+    "reg#x0": 1610612738,
+    "reg#x1": 0,
+    "reg#c": 0,
+    "reg#z": 0,
+    "reg#x30": 0
+  },
+  {
+    "flag": {
+      "rand_memory": true
+    },
+    "reg#x0": 1879048194,
+    "reg#x1": 0,
+    "reg#c": 0,
+    "reg#z": 0,
+    "reg#x30": 0
+  },
+  {
+    "flag": {
+      "rand_memory": true
+    },
+    "reg#x0": 2013265922,
+    "reg#x1": 0,
+    "reg#c": 0,
+    "reg#z": 0,
+    "reg#x30": 0
+  },
+  {
+    "flag": {
+      "rand_memory": true
+    },
+    "reg#x0": 2080374786,
+    "reg#x1": 0,
+    "reg#c": 0,
+    "reg#z": 0,
+    "reg#x30": 0
+  },
+  {
+    "flag": {
+      "rand_memory": true
+    },
+    "reg#x0": 2113929218,
+    "reg#x1": 0,
+    "reg#c": 0,
+    "reg#z": 0,
+    "reg#x30": 0
+  },
+  {
+    "flag": {
+      "rand_memory": true
+    },
+    "reg#x0": 2130706434,
+    "reg#x1": 0,
+    "reg#c": 0,
+    "reg#z": 0,
+    "reg#x30": 0
+  },
+  {
+    "flag": {
+      "rand_memory": true
+    },
+    "reg#x0": 2139095042,
+    "reg#x1": 0,
+    "reg#c": 0,
+    "reg#z": 0,
+    "reg#x30": 0
+  },
+  {
+    "flag": {
+      "rand_memory": true
+    },
+    "reg#x0": 2143289346,
+    "reg#x1": 0,
+    "reg#c": 0,
+    "reg#z": 0,
+    "reg#x30": 0
+  },
+  {
+    "flag": {
+      "rand_memory": true
+    },
+    "reg#x0": 2145386498,
+    "reg#x1": 0,
+    "reg#c": 0,
+    "reg#z": 0,
+    "reg#x30": 0
+  },
+  {
+    "flag": {
+      "rand_memory": true
+    },
+    "reg#x0": 2146435074,
+    "reg#x1": 0,
+    "reg#c": 0,
+    "reg#z": 0,
+    "reg#x30": 0
+  },
+  {
+    "flag": {
+      "rand_memory": true
+    },
+    "reg#x0": 2146959362,
+    "reg#x1": 0,
+    "reg#c": 0,
+    "reg#z": 0,
+    "reg#x30": 0
+  },
+  {
+    "flag": {
+      "rand_memory": true
+    },
+    "reg#x0": 2147221506,
+    "reg#x1": 0,
+    "reg#c": 0,
+    "reg#z": 0,
+    "reg#x30": 0
+  }
+]
