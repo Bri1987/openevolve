@@ -27,7 +27,7 @@ LOGGER = logging.getLogger("examples.nn_shl_c.evaluator")
 DEFAULT_TSUPER_ROOT = Path(os.environ.get("TSUPER_ROOT", "/home/ubuntu/lsy_workspace/t-superoptimizer"))
 
 RE_INFO = re.compile(r"\[info\]\s*cost:\s*([0-9]+(?:\.[0-9]+)?),\s*perf:\s*([0-9]+(?:\.[0-9]+)?)", re.I)
-
+RE_PERF_TERMS = re.compile(r"perf_terms:\s*([0-9eE+\-\.\,\s]+)", re.I)
 
 def _parse_cost_perf(text: str):
     matches = RE_INFO.findall(text)
@@ -40,6 +40,36 @@ def _parse_cost_perf(text: str):
     except Exception:
         return None
     return cost, perf
+
+def _extract_cex_from_output(text: str):
+    """Extract the cex content that appears after the last [info] line.
+
+    Returns a list of counterexample strings (may be empty).
+    Handles cex on same line as [info] (comma-separated) and multi-line text.
+    """
+    last = None
+    for m in RE_INFO.finditer(text):
+        last = m
+    if last is None:
+        return []
+    tail = text[last.end():]
+    # Only accept explicit <cex>...</cex> tags. If none present, treat as
+    # "no counterexamples" (return empty list). This avoids capturing
+    # sandbox noise like SIGSEGV lines or other stray text.
+    tags = re.findall(r"<cex>(.*?)</cex>", tail, re.I | re.S)
+    if not tags:
+        return []
+
+    parts = []
+    for t in tags:
+        t = t.strip()
+        if not t:
+            continue
+        # split each tag content by newline or semicolon to separate multiple examples
+        for p in re.split(r"\s*[;\n]\s*", t):
+            if p.strip():
+                parts.append(p.strip())
+    return parts
 
 
 def evaluate(program_path: str) -> EvaluationResult:
@@ -63,10 +93,10 @@ def evaluate(program_path: str) -> EvaluationResult:
                 file.writelines(lines)
         
         # 打印文件内容
-        content = ''.join(lines)
-        print("\n=== File Content ===")
-        print(content)
-        print("=== End of File ===\n")
+        # content = ''.join(lines)
+        # print("\n=== File Content ===")
+        # print(content)
+        # print("=== End of File ===\n")
         
     except FileNotFoundError:
         print(f"Error: File not found at {program_path}")
@@ -94,7 +124,7 @@ def evaluate(program_path: str) -> EvaluationResult:
 def _evaluate(program_path: str) -> EvaluationResult:
     tsuper_root = DEFAULT_TSUPER_ROOT
     tsuper_bin = tsuper_root / "build" / "tsuperoptimizer"
-    toml_path = tsuper_root / "asm" / "final_benchmark" / "nn_shl_c" / "nn_shl_c.toml"
+    toml_path = tsuper_root / "asm" / "final_benchmark" / "nn_shl_c" / "nn_shl_c_evaluator.toml"
 
     if not tsuper_bin.exists():
         return EvaluationResult(
@@ -166,9 +196,9 @@ def _evaluate(program_path: str) -> EvaluationResult:
     output = proc.stdout or ""
 
     # Print the external command output for debugging (user requested).
-    print("\n=== tsuperoptimizer output ===")
-    print(output)
-    print("=== end tsuperoptimizer output ===\n")
+    # print("\n=== tsuperoptimizer output ===")
+    # print(output)
+    # print("=== end tsuperoptimizer output ===\n")
 
     parsed = _parse_cost_perf(output)
     if parsed:
@@ -178,6 +208,28 @@ def _evaluate(program_path: str) -> EvaluationResult:
         raw_correctness_cost = None
         raw_perf_cost = None
         compile_success = True  # 已通过 gcc -c
+        
+    counterexamples = _extract_cex_from_output(output)
+        
+    print("correctness_cost:", raw_correctness_cost)
+    print("perf_cost:", raw_perf_cost)    
+    # 尝试提取 perf_terms 并打印出来（只打印，不加入 metrics）
+    try:
+        m_terms = RE_PERF_TERMS.search(output)
+        if m_terms:
+            perf_terms_str = m_terms.group(1).strip()
+            # 按逗号拆分并尝试转换为 float 列表
+            try:
+                perf_terms = [float(x) for x in re.split(r"\s*,\s*", perf_terms_str) if x != ""]
+            except Exception:
+                perf_terms = None
+            if perf_terms is not None:
+                print("perf_terms:", perf_terms)
+            else:
+                # 如果无法解析为数字，仍然打印原始字符串以便调试
+                print("perf_terms (raw):", perf_terms_str)
+    except Exception:
+        LOGGER.exception("Failed to parse perf_terms from output")
 
     # ────────────────────────────────────────────────
     # 转换为越高越好的 score
@@ -190,7 +242,7 @@ def _evaluate(program_path: str) -> EvaluationResult:
         correctness_score = 1.0 / (1.0 + raw_correctness_cost ** 0.4 * 10)   # **0.5 压缩大值，*10 控制斜率
 
     # 性能 score（perf 越小越好，用 baseline 归一化）
-    BASELINE_PERF = 54.666666666666664  # 你的初始程序 perf 值
+    BASELINE_PERF = 71.55555555555556  # 你的初始程序 perf 值
     if raw_perf_cost is None or raw_perf_cost <= 0:
         performance_score = 0.0
     else:
@@ -213,6 +265,7 @@ def _evaluate(program_path: str) -> EvaluationResult:
 
     artifacts = {
         "compile_success": compile_success,
+        "counterexamples": counterexamples,
     }
 
     return EvaluationResult(metrics=metrics, artifacts=artifacts)
@@ -227,5 +280,6 @@ if __name__ == "__main__":
         sys.exit(1)
     candidate = _P(sys.argv[1])
     res = evaluate(str(candidate))
+    print("final result:")
     print(json.dumps({"metrics": res.metrics}, indent=2))
-    print(json.dumps({"artifacts": res.artifacts}, indent=2))
+    # print(json.dumps({"artifacts": res.artifacts}, indent=2))

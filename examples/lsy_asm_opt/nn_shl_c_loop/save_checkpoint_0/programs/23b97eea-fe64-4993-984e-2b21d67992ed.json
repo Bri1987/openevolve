@@ -1,0 +1,24 @@
+{
+  "id": "23b97eea-fe64-4993-984e-2b21d67992ed",
+  "code": ".section .text\n.global nn_shl_c\n\nnn_shl_c:\n    // x0 = dest pointer, x1 = src pointer, x2 = count, x3 = shift amount, x4 = carry-in\n    // Save dest pointer and initialize carry\n    mov     x9, x0\n    mov     x0, x4\n    \n    // Early exit if count <= 0\n    cmp     x2, #0\n    b.le    L_exit\n    \n    // Handle shift == 0 separately for better performance\n    cbz     x3, L_zero_shift\n    \n    // Precompute shift values using 64-bit registers\n    mov     x10, #64\n    sub     x10, x10, x3         // 64 - shift\n    sub     x8, x3, #64          // shift - 64\n    \n    // Check if shift >= 64\n    cmp     x8, #0\n    b.ge    L_large_shift\n    \n    // For 0 < shift < 64, proceed to normal loop\n    \n    // Main loop for normal shifts (0 < shift < 64)\n    // Unroll 2x for better performance\n    lsr     x11, x2, #1          // count/2 iterations\n    cbz     x11, L_normal_single\n    \nL_normal_loop:\n    // First element\n    ldr     x5, [x1], #8\n    lsl     x7, x5, x3           // src[i] << shift\n    add     x0, x0, x7           // dest[i] = (src[i] << shift) + carry\n    str     x0, [x9], #8\n    lsr     x0, x5, x10          // carry = src[i] >> (64 - shift)\n    \n    // Second element\n    ldr     x5, [x1], #8\n    lsl     x7, x5, x3\n    add     x0, x0, x7\n    str     x0, [x9], #8\n    lsr     x0, x5, x10\n    \n    subs    x11, x11, #1\n    b.ne    L_normal_loop\n    \n    // Handle odd count\n    tbz     x2, #0, L_exit\n    \nL_normal_single:\n    ldr     x5, [x1], #8\n    lsl     x7, x5, x3\n    add     x0, x0, x7\n    str     x0, [x9], #8\n    lsr     x0, x5, x10\n    ret\n\n// Zero shift case\nL_zero_shift:\n    // When shift == 0, dest[i] = src[i] + carry\n    // The carry propagates through additions\n    // Unroll 2x for better performance\n    lsr     x11, x2, #1          // count/2 iterations\n    cbz     x11, L_zero_single\n\nL_zero_loop:\n    // First element\n    ldr     x5, [x1], #8\n    add     x0, x0, x5\n    str     x0, [x9], #8\n    // Carry for next is 0 because shift == 0\n    mov     x0, xzr\n    \n    // Second element\n    ldr     x5, [x1], #8\n    add     x0, x0, x5\n    str     x0, [x9], #8\n    mov     x0, xzr\n    \n    subs    x11, x11, #1\n    b.ne    L_zero_loop\n    \n    // Handle odd count\n    tbz     x2, #0, L_exit\n    \nL_zero_single:\n    ldr     x5, [x1], #8\n    add     x0, x0, x5\n    str     x0, [x9], #8\n    mov     x0, xzr\n    ret\n\nL_large_shift:\n    // shift >= 64: all bits shift out, carry propagates\n    // x8 = shift - 64\n    lsr     x11, x2, #1          // count/2 iterations\n    cbz     x11, L_large_single\n    \nL_large_loop:\n    // First element\n    ldr     x5, [x1], #8\n    str     x0, [x9], #8         // Store current carry as dest[i]\n    lsl     x0, x5, x8           // New carry = src[i] << (shift - 64)\n    \n    // Second element\n    ldr     x5, [x1], #8\n    str     x0, [x9], #8\n    lsl     x0, x5, x8\n    \n    subs    x11, x11, #1\n    b.ne    L_large_loop\n    \n    // Handle odd count\n    tbz     x2, #0, L_exit\n    \nL_large_single:\n    ldr     x5, [x1], #8\n    str     x0, [x9], #8\n    lsl     x0, x5, x8\n    ret\n\n\n\nL_exit:\n    ret",
+  "changes_description": "",
+  "language": "unknown",
+  "parent_id": null,
+  "generation": 0,
+  "timestamp": 1772606222.9321399,
+  "iteration_found": 0,
+  "metrics": {
+    "combined_score": 0.7892873213750411,
+    "correctness_score": 1.0,
+    "performance_score": 0.7892873213750411
+  },
+  "diversity": 366.6875,
+  "better_than_base_avg_position": 0.0,
+  "metadata": {
+    "island": 0
+  },
+  "prompts": null,
+  "artifacts_json": null,
+  "artifact_dir": null,
+  "embedding": null
+}

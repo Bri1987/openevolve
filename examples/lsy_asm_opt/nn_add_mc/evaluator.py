@@ -63,10 +63,10 @@ def evaluate(program_path: str) -> EvaluationResult:
                 file.writelines(lines)
         
         # 打印文件内容
-        content = ''.join(lines)
-        print("\n=== File Content ===")
-        print(content)
-        print("=== End of File ===\n")
+        # content = ''.join(lines)
+        # print("\n=== File Content ===")
+        # print(content)
+        # print("=== End of File ===\n")
         
     except FileNotFoundError:
         print(f"Error: File not found at {program_path}")
@@ -94,7 +94,7 @@ def evaluate(program_path: str) -> EvaluationResult:
 def _evaluate(program_path: str) -> EvaluationResult:
     tsuper_root = DEFAULT_TSUPER_ROOT
     tsuper_bin = tsuper_root / "build" / "tsuperoptimizer"
-    toml_path = tsuper_root / "asm" / "final_benchmark" / "nn_add_mc" / "nn_add_mc.toml"
+    toml_path = tsuper_root / "asm" / "final_benchmark" / "nn_add_mc" / "nn_add_mc_evaluator.toml"
 
     if not tsuper_bin.exists():
         return EvaluationResult(
@@ -166,9 +166,9 @@ def _evaluate(program_path: str) -> EvaluationResult:
     output = proc.stdout or ""
 
     # Print the external command output for debugging (user requested).
-    print("\n=== tsuperoptimizer output ===")
-    print(output)
-    print("=== end tsuperoptimizer output ===\n")
+    # print("\n=== tsuperoptimizer output ===")
+    # print(output)
+    # print("=== end tsuperoptimizer output ===\n")
 
     parsed = _parse_cost_perf(output)
     if parsed:

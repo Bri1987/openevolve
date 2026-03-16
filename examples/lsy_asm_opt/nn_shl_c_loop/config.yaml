@@ -1,28 +1,33 @@
-max_iterations: 10
+max_iterations: 40
 checkpoint_interval: 1
 file_suffix: .s
 llm:
-  primary_model: gpt-5.4
+  primary_model: DeepSeek-V3.2
   primary_model_weight: 1.0
   secondary_model_weight: 0.0
-  api_base: https://yunwu.ai/v1/
+  api_base: https://llmapi.paratera.com
   temperature: 0.7
-  max_tokens: 128000
-  timeout: 600
+  max_tokens: 4096
+  timeout: 120
 prompt:
   system_message: You are an expert in AArch64 assembly optimization. Your task is
     to rewrite the provided assembly code to achieve maximum performance. Before optimizing,
     carefully analyze the assembly semantics. Pay strict attention to edge cases (e.g.,
     null pointers, zero length, alignment, carry/overflow) to ensure 100% functional
     correctness.
-    
 database:
   population_size: 100
   archive_size: 20
-  num_islands: 3
+  num_islands: 1
   elite_selection_ratio: 0.2
   exploitation_ratio: 0.7
   similarity_threshold: 0.99
+  feature_dimensions:
+  - diversity
+  - better_than_base_avg_position
+  feature_bins:
+    better_than_base_avg_position: 5
+    diversity: 8
 evaluator:
   timeout: 120
   cascade_evaluation: false

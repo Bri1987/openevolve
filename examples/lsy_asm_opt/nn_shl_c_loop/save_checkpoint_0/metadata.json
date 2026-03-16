@@ -1,0 +1,56 @@
+{
+  "island_feature_maps": [
+    {
+      "0-0": "23b97eea-fe64-4993-984e-2b21d67992ed",
+      "4-3": "41a68a9c-72d2-4349-9e5d-d24956be2aab"
+    },
+    {
+    },
+    {}
+  ],
+  "islands": [
+    [
+      "23b97eea-fe64-4993-984e-2b21d67992ed",
+      "41a68a9c-72d2-4349-9e5d-d24956be2aab"
+    ],
+    [
+    ],
+    []
+  ],
+  "archive": [
+    "23b97eea-fe64-4993-984e-2b21d67992ed",
+    "41a68a9c-72d2-4349-9e5d-d24956be2aab"
+  ],
+  "best_program_id": "23b97eea-fe64-4993-984e-2b21d67992ed",
+  "island_best_programs": [
+    "23b97eea-fe64-4993-984e-2b21d67992ed",
+    null,
+    null
+  ],
+  "last_iteration": 0,
+  "current_island": 0,
+  "island_generations": [
+    0,
+    0,
+    0
+  ],
+  "last_migration_generation": 0,
+  "feature_stats": {
+    "better_than_base_avg_position": {
+      "min": 0.0,
+      "max": 12.0,
+      "values": [
+        0.0,
+        12.0
+      ]
+    },
+    "diversity": {
+      "min": 366.7,
+      "max": 573.8,
+      "values": [
+        573.84,
+        366.69
+      ]
+    }
+  }
+}

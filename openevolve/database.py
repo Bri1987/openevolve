@@ -861,14 +861,21 @@ class ProgramDatabase:
                 # Use code length as complexity measure
                 complexity = len(program.code)
                 bin_idx = self._calculate_complexity_bin(complexity)
+                # program.metrics["complexity"] = float(complexity)
+                program.complexity = float(complexity)
                 coords.append(bin_idx)
             elif dim == "diversity":
                 # Use cached diversity calculation with reference set
                 if len(self.programs) < 2:
+                    # program.metrics["diversity"] = 0.0
+                    program.diversity = 0.0
                     bin_idx = 0
                 else:
                     diversity = self._get_cached_diversity(program)
                     bin_idx = self._calculate_diversity_bin(diversity)
+                    # program.metrics["diversity"] = float(diversity)
+                    program.diversity = float(diversity)
+
                 coords.append(bin_idx)
             elif dim == "score":
                 # Use average of numeric metrics

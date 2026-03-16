@@ -1,0 +1,24 @@
+{
+  "id": "41a68a9c-72d2-4349-9e5d-d24956be2aab",
+  "code": ".section .text\n.global nn_shl_c\n\nnn_shl_c:\n    // x0 = dest pointer, x1 = src pointer, x2 = count, x3 = shift amount, x4 = carry-in\n    // Save dest pointer and initialize carry\n    mov     x9, x0\n    mov     x0, x4\n    \n    // Early exit if count <= 0\n    cmp     x2, #0\n    b.le    L_exit\n    \n    // Handle shift == 0 case efficiently\n    cbz     x3, L_copy_loop\n    \n    // Precompute shift values\n    mov     w10, #64\n    sub     w10, w10, w3         // 64 - shift\n    sub     w8, w3, #64          // shift - 64\n    \n    // Check if shift >= 64\n    cmp     w8, #0\n    b.ge    L_large_shift\n    \n    // Main loop for normal shifts (0 < shift < 64)\n    // 4x unrolled for better performance with better instruction scheduling\n    lsr     x11, x2, #2          // count/4 iterations\n    cbz     x11, L_normal_remainder\n    \nL_normal_loop:\n    // First element\n    ldr     x5, [x1], #8\n    lsl     x7, x5, x3\n    add     x0, x0, x7\n    str     x0, [x9], #8\n    lsr     x0, x5, x10\n    \n    // Second element\n    ldr     x5, [x1], #8\n    lsl     x7, x5, x3\n    add     x0, x0, x7\n    str     x0, [x9], #8\n    lsr     x0, x5, x10\n    \n    // Third element\n    ldr     x5, [x1], #8\n    lsl     x7, x5, x3\n    add     x0, x0, x7\n    str     x0, [x9], #8\n    lsr     x0, x5, x10\n    \n    // Fourth element\n    ldr     x5, [x1], #8\n    lsl     x7, x5, x3\n    add     x0, x0, x7\n    str     x0, [x9], #8\n    lsr     x0, x5, x10\n    \n    subs    x11, x11, #1\n    b.ne    L_normal_loop\n    \nL_normal_remainder:\n    // Handle remaining elements (0-3)\n    ands    x2, x2, #3\n    b.eq    L_normal_done\n    \nL_normal_remainder_loop:\n    ldr     x5, [x1], #8\n    lsl     x7, x5, x3\n    add     x0, x0, x7\n    str     x0, [x9], #8\n    lsr     x0, x5, x10\n    subs    x2, x2, #1\n    b.ne    L_normal_remainder_loop\n    \nL_normal_done:\n    ret\n\nL_large_shift:\n    // shift >= 64: all bits shift out, carry propagates\n    // x8 = shift - 64\n    // 4x unrolled for better performance\n    lsr     x11, x2, #2          // count/4 iterations\n    cbz     x11, L_large_remainder\n    \nL_large_loop:\n    // First element\n    ldr     x5, [x1], #8\n    str     x0, [x9], #8\n    lsl     x0, x5, x8\n    \n    // Second element\n    ldr     x5, [x1], #8\n    str     x0, [x9], #8\n    lsl     x0, x5, x8\n    \n    // Third element\n    ldr     x5, [x1], #8\n    str     x0, [x9], #8\n    lsl     x0, x5, x8\n    \n    // Fourth element\n    ldr     x5, [x1], #8\n    str     x0, [x9], #8\n    lsl     x0, x5, x8\n    \n    subs    x11, x11, #1\n    b.ne    L_large_loop\n    \nL_large_remainder:\n    // Handle remaining elements (0-3)\n    ands    x2, x2, #3\n    b.eq    L_large_done\n    \nL_large_remainder_loop:\n    ldr     x5, [x1], #8\n    str     x0, [x9], #8\n    lsl     x0, x5, x8\n    subs    x2, x2, #1\n    b.ne    L_large_remainder_loop\n    \nL_large_done:\n    ret\n\nL_copy_loop:\n    // shift == 0: just copy with carry addition\n    // Process first element with carry, then use load-pair/store-pair for efficiency\n    cmp     x2, #0\n    b.le    L_exit\n    \n    // First element with carry\n    ldr     x5, [x1], #8\n    add     x0, x0, x5\n    str     x0, [x9], #8\n    subs    x2, x2, #1\n    b.le    L_exit_zero_carry\n    \n    // Now carry is zero, process remaining in pairs\n    lsr     x11, x2, #1          // count/2 iterations\n    cbz     x11, L_copy_single\n    \nL_copy_rest_loop:\n    ldp     x5, x6, [x1], #16\n    stp     x5, x6, [x9], #16\n    subs    x11, x11, #1\n    b.ne    L_copy_rest_loop\n    \n    // Handle odd remaining element\n    tbz     x2, #0, L_exit_zero_carry\n    \nL_copy_single:\n    ldr     x5, [x1], #8\n    str     x5, [x9], #8\n    \nL_exit_zero_carry:\n    mov     x0, xzr\n    ret\n\nL_exit:\n    ret",
+  "changes_description": "",
+  "language": "unknown",
+  "parent_id": null,
+  "generation": 0,
+  "timestamp": 1772606232.9321399,
+  "iteration_found": 0,
+  "metrics": {
+    "combined_score": 0.7771624461881349,
+    "correctness_score": 1.0,
+    "performance_score": 0.7771624461881349
+  },
+  "diversity": 573.8357142857142,
+  "better_than_base_avg_position": 12.0,
+  "metadata": {
+    "island": 0
+  },
+  "prompts": null,
+  "artifacts_json": null,
+  "artifact_dir": null,
+  "embedding": null
+}

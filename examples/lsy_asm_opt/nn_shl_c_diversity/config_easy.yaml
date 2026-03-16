@@ -1,0 +1,89 @@
+# Configuration for diversity seed generation (AArch64 assembly optimization)
+# 目标：生成大量正确但结构/控制流差异大的程序，作为后续种群初始种子
+
+max_iterations: 150               # 不需要跑太久，重点是填充多样性格子
+checkpoint_interval: 10           # 更频繁保存，便于后期提取
+file_suffix: ".s"
+
+# LLM configuration
+llm:
+  primary_model: "deepseek-chat"
+  primary_model_weight: 1.0
+  # secondary_model: ""          # 完全禁用 secondary，避免干扰
+  secondary_model_weight: 0.0
+  api_base: "https://api.deepseek.com"   # 或 "https://api.deepseek.com/v1" 看你的实际兼容情况
+  temperature: 0.75                      # 稍高一点，促进创意/多样性
+  max_tokens: 4096                      # DeepSeek 支持较大上下文
+  timeout: 180
+
+# Prompt configuration
+prompt:
+  system_message: |
+    You are an expert in AArch64 assembly optimization.
+    Your task is to rewrite or heavily modify the given program to achieve significantly better performance,
+    while keeping full functional equivalence (same input → same output on all test cases).
+    Focus especially on changing control flow structure, instruction ordering, basic block organization,
+    loop nesting, branch patterns, or register usage patterns — as long as semantics remain identical.
+
+  # 关键：启用 prompt 随机变体，促进生成不同风格的程序
+  use_template_stochasticity: true
+  template_variations:
+    greeting:
+      - "Significantly refactor the control flow structure and generate a completely different style equivalent version:"
+      - "Try a completely restructured instruction ordering and branching organization:"
+      - "Rewrite the program with different basic block partitioning and loop nesting:"
+      - "Alter the control flow graph topology while preserving semantic equivalence:"
+      - "Explore an alternative register allocation and memory access pattern:"
+    improvement_suggestion:
+      - "Focus on changing the number of basic blocks, cyclomatic complexity, loop depth, or conditional branch ratio"
+      - "You can reorder a large number of instructions, adjust jump targets, merge or split basic blocks"
+      - "The goal is to make the control flow graph noticeably different (more/fewer basic blocks, deeper/shallower nesting), but remain fully correct on all test cases"
+      - "Prioritize improving instruction-level parallelism or reducing dependency chain length, without introducing bugs"
+      - "You may introduce new control flow patterns (such as more prefetching or conditional moves) as long as performance may improve"
+
+  # 多样性生成参数（MAP-Elites 会利用这些）
+  num_top_programs: 4          # 保留一些顶级性能程序
+  num_diverse_programs: 6      # 重点！鼓励生成更多结构不同的变体
+  include_artifacts: true      # 保留 evaluator 的详细反馈（有助于后续 prompt）
+
+# Database configuration (MAP-Elites + Islands 是多样性的核心)
+database:
+  population_size: 300           # 显著增大，支持更多格子被填充
+  archive_size: 80               # 存档容量大一些，便于后期提取多样种子
+  num_islands: 6                 # 多岛并行，天然增加探索多样性
+  migration_interval: 15         # 岛间迁移，促进好想法传播
+  elite_selection_ratio: 0.15    # 更严格的精英保留
+  exploitation_ratio: 0.65       # 平衡探索与利用
+
+  # 关键：定义 MAP-Elites 的特征维度（binning 依据）
+  # "complexity" 和 "diversity" 是内置的，其他需你的 evaluator 返回对应 metric
+  feature_dimensions:
+    - "complexity"               # 内置：代码长度
+    - "diversity"                # 内置：结构多样性（指令模式等）
+    - "performance"              # 自定义：你的 perf_cost（越低越好）
+    - "cyclomatic"               # 自定义：圈复杂度（E - N + 2）
+    - "basic_blocks"             # 自定义：基本块数量
+    - "max_loop_nest"            # 自定义：最深循环嵌套层数
+    # 如果你的 evaluator 还能返回更多（如 register_peak、branch_ratio、ddg_longest_path），可以继续加
+
+  # 每个维度的 bin 数量（越多格子越细，越多多样程序）
+  feature_bins:
+    complexity: 10
+    performance: 12
+    cyclomatic: 8
+    basic_blocks: 10
+    max_loop_nest: 6
+
+  similarity_threshold: 0.96     # 稍降低，避免太相似的程序互相覆盖
+
+# Evaluator configuration
+evaluator:
+  timeout: 180
+  cascade_evaluation: false
+  parallel_evaluations: 4        # 根据你的机器调整
+  # 强烈建议：在 evaluator.py 中返回更多 metrics（如上面 feature_dimensions 列的那些）
+  # 例如 return {"correctness": ..., "performance": ..., "cyclomatic": ..., "basic_blocks": ..., ...}
+
+# Evolution settings
+diff_based_evolution: true       # 保持 diff 方式，更稳定
+max_code_length: 20000           # 汇编文件有时较长，适当放宽

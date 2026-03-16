@@ -890,5 +890,32 @@
     "memory#x1000000003d": 0,
     "memory#xfffffffffe": 0,
     "memory#xffffffffff": 0
+  },
+  {
+    "flag": {
+      "rand_memory": false
+    },
+    "reg#x4": 1,
+    "memory#x8000000003": 255,
+    "reg#x0": 549755813887,
+    "memory#x7fffffffff": 254,
+    "reg#x3": 1,
+    "memory#x8000000002": 255,
+    "reg#x1": 549755813887,
+    "memory#x8000000000": 255,
+    "reg#x2": 549755813887,
+    "memory#x8000000001": 255,
+    "memory#x8000000006": 255,
+    "memory#x8000000005": 255,
+    "memory#x8000000004": 255,
+    "reg#z": 0,
+    "reg#x5": 0,
+    "reg#v": 0,
+    "reg#x6": 0,
+    "reg#x8": 0,
+    "reg#x7": 0,
+    "reg#n": 0,
+    "reg#x30": 0,
+    "reg#c": 0
   }
 ]
